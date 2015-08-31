@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="./style.css">
+    </head>
+
+    <body>
+        <h1> BrainFuck Compiler </h1>
+
+        <div class="container">
+            <div class="textareacontainer">
+                <div class="textarea">
+                    <div style="overflow:auto;">
+                        <div class="headerText">Edit This Code:</div>
+                        <button class="seeResult" type="button" onclick="compile()">Run it! >> </button>
+                    </div>
+                    <div class="textareawrapper">
+                        <textarea autocomplete="off" class="code_input" id="textareaCode" wrap="logical" spellcheck="false">
+                        </textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="iframecontainer">
+                <div class="iframe">
+                    <div style="overflow:auto;">
+                        <div class="headerText">Result:</div>
+                    </div>
+                    <div class="codeout_wrapper">
+                        <textarea autocomplete="off" class="code_input" id="codeOutput" wrap="logical" spellcheck="false">
+                        </textarea>
+
+                        <input type="hidden" id="bt" name="bt" value="1">
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <script>
+            function compile() {
+                var code = document.getElementById("textareaCode").value;
+                //alert(code);
+                document.getElementById("codeOutput").value = code;
+            }
+        </script>
+
+    </body>
+</html>
