@@ -2,21 +2,19 @@
 <html>
     <head>
         <link rel="stylesheet" href="./style.css">
+        <script src="brain.js"></script>
     </head>
 
     <body>
-        <h1> BrainFuck Compiler </h1>
-
+        <h1> BrainFuck interpreter with js_of_ocaml (to be continued ...) </h1>
         <div class="container">
             <div class="textareacontainer">
                 <div class="textarea">
                     <div style="overflow:auto;">
                         <div class="headerText">Edit This Code:</div>
-                        <button class="seeResult" type="button" onclick="compile()">Run it! >> </button>
+                        <button class="seeResult" type="button" id="compile_button" >Run it! >> </button>
                     </div>
-                    <div class="textareawrapper">
-                        <textarea autocomplete="off" class="code_input" id="textareaCode" wrap="logical" spellcheck="false">
-                        </textarea>
+                    <div class="textareawrapper" id="textareawrapper">
                     </div>
                 </div>
             </div>
@@ -26,9 +24,7 @@
                     <div style="overflow:auto;">
                         <div class="headerText">Result:</div>
                     </div>
-                    <div class="codeout_wrapper">
-                        <textarea autocomplete="off" class="code_input" id="codeOutput" wrap="logical" spellcheck="false">
-                        </textarea>
+                    <div class="codeout_wrapper" id="output">
 
                         <input type="hidden" id="bt" name="bt" value="1">
                         </form>
