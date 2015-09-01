@@ -31,6 +31,7 @@ let eval_string str input =
   let mem = Array.make 1000 0 in
   let counter = ref 0 in
   let pos = ref 0  in
+  let result = ref "" in
   let incr_data d =
     mem.(d) <- if mem.(d) >= 255 then 0 else mem.(d) + 1 in
   let decr_data d =
@@ -69,9 +70,13 @@ let eval_string str input =
         | ']' -> if mem.(d) = 0 then loop (i + 1) d
                  else (incr counter; loop (skip_back i 0) d)
         | ',' -> (read_data d); loop (i + 1) d
-        | '.' -> Printf.printf "%c" (Char.chr mem.(d)); loop (i + 1) d
+        | '.' -> (
+          let v = Printf.sprintf "%c" (Char.chr mem.(d)) in
+          result := !result ^ v;
+          Printf.printf "%c" (Char.chr mem.(d)); loop (i + 1) d)
         | _ -> raise Syntax_error)) in
-  loop 0 0;;
+  loop 0 0;
+  !result;;
 
 let elem_from_id id =
   let elem =
@@ -97,12 +102,11 @@ let start _ =
   Dom.appendChild out_wrapper result;
   button##onclick <- Html.handler (
                          (fun _ -> (
-                            let v = source##value in
-                            eval_string "" "";
-                            result##value <- v;
+                            let v = Js.to_string (source##value) in
+                            let r = eval_string v "" in
+                            result##value <- (Js.string r);
                             Js._true)));
   Js._false
-
 
 let _ =
   Html.window##onload <- Html.handler start
