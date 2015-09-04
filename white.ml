@@ -1,5 +1,5 @@
 
-(* module Html = Dom_html *)
+
 
 type token = Number of int
            | Variable of string
@@ -284,32 +284,32 @@ and parse_primary_exp stream =
      BoolExp x
   | _ -> raise Syntax_error;;
 
-let print_value value =
-  Printf.printf "value: %d\n" value;;
+let print_value value res =
+  res := !res ^ (Printf.sprintf "value: %d\n" value);;
 
 (* evaler *)
-let rec eval prog env =
+let rec eval prog env res=
   match prog with
   | Stmts [] -> ()
   | Stmts (stmt::left) ->
-     eval stmt env;
-     eval (Stmts left) env
+     eval stmt env res;
+     eval (Stmts left) env res
   | Assign (lhs, rhs) ->
      let key = variable_name lhs in
      let value = eval_exp rhs env in
      Hashtbl.replace env key value
   | IfStmt (cond, tbody, fbody) ->
      if eval_bexp cond env then
-       eval tbody env
+       eval tbody env res
      else
-       eval fbody env
+       eval fbody env res
   | PrintStmt exp ->
      let r = eval_exp exp env in
-     print_value r
+     print_value r res
   | WhileStmt (cond, body) ->
      let rec loop() =
        if eval_bexp cond env then (
-         eval body env;
+         eval body env res;
          loop())
        else () in
      loop()
@@ -371,19 +371,21 @@ let parse_of_string str =
 
 let eval_prog prog =
   let env = Hashtbl.create 1000 in
-  eval prog env;
-  let pairs = Hashtbl.fold (fun k v acc -> (k, v)::acc) env [] in
-  let result = List.sort (fun (k1, _) (k2, _) -> String.compare k1 k2) pairs in
-  List.iter (fun (k, v) -> Printf.printf "%s %d\n" k v) result;;
+  let res = ref "" in
+  eval prog env res;
+  !res;;
 
 let eval_string str =
   let stmts = (lexer_of_string str) |> parse_stmts in
-  eval_prog stmts;
-  "";;
+  let res = eval_prog stmts in
+  res;;
 
-let () =
-  let stmts = (lexer_of_channel stdin) |> parse_stmts in
-  eval_prog stmts;;
+(* let () = *)
+(*   let stmts = (lexer_of_channel stdin) |> parse_stmts in *)
+(*   let res = eval_prog stmts in *)
+(*   Printf.printf "result: %s\n" res;; *)
+
+module Html = Dom_html
 
 let elem_from_id id =
   let elem =
