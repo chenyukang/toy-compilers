@@ -1,3 +1,6 @@
+
+(* module Html = Dom_html *)
+
 type token = Number of int
            | Variable of string
            | Bool of bool
@@ -19,6 +22,7 @@ type token = Number of int
            | OpAssign
            | OpLess
            | OpLarg
+           | OpPut
            | Semi;;
 
 type exp =
@@ -37,6 +41,7 @@ type exp =
    | Stmts of stmt list
    | Assign of exp * exp
    | IfStmt of exp * stmt * stmt
+   | PrintStmt of exp
    | WhileStmt of exp * stmt;;
 
 type program = stmt list;;
@@ -102,6 +107,7 @@ and lex_ident stream buffer =
        | "while" -> KwdWhile
        | "and" -> OpAnd
        | "or" -> OpOr
+       | "put" -> OpPut
        | "true" -> Bool true
        | "false" -> Bool false
        | _ -> Variable ident)
@@ -151,6 +157,7 @@ and parse_stmt stream =
   match Stream.peek stream with
   | Some KwdIf -> parse_if stream
   | Some KwdWhile -> parse_while stream
+  | Some OpPut -> parse_put stream
   | Some (Variable _) -> parse_assign stream
   | _ -> raise Syntax_error
 
@@ -173,6 +180,11 @@ and parse_while stream =
   let body = parse_stmts stream in
   skip stream [RBracket];
   WhileStmt(cond, body)
+
+and parse_put stream =
+  skip stream [OpPut];
+  let value = parse_exp stream in
+  PrintStmt value
 
 and parse_assign stream =
   let lhs = parse_var stream in
@@ -272,6 +284,8 @@ and parse_primary_exp stream =
      BoolExp x
   | _ -> raise Syntax_error;;
 
+let print_value value =
+  Printf.printf "value: %d\n" value;;
 
 (* evaler *)
 let rec eval prog env =
@@ -289,6 +303,9 @@ let rec eval prog env =
        eval tbody env
      else
        eval fbody env
+  | PrintStmt exp ->
+     let r = eval_exp exp env in
+     print_value r
   | WhileStmt (cond, body) ->
      let rec loop() =
        if eval_bexp cond env then (
@@ -359,10 +376,44 @@ let eval_prog prog =
   let result = List.sort (fun (k1, _) (k2, _) -> String.compare k1 k2) pairs in
   List.iter (fun (k, v) -> Printf.printf "%s %d\n" k v) result;;
 
-let eval_of_string str =
+let eval_string str =
   let stmts = (lexer_of_string str) |> parse_stmts in
-  eval_prog stmts;;
+  eval_prog stmts;
+  "";;
 
 let () =
   let stmts = (lexer_of_channel stdin) |> parse_stmts in
   eval_prog stmts;;
+
+let elem_from_id id =
+  let elem =
+    Js.Opt.get (Html.document##getElementById(Js.string id))
+               (fun () -> assert false) in
+  elem;;
+
+let start _ =
+  let wrapper = elem_from_id "textareawrapper" in
+  let button = elem_from_id "compile_button" in
+  let out_wrapper = elem_from_id "output" in
+  let source  = Html.createTextarea Html.document in
+  let result = Html.createTextarea Html.document in
+  source##style##width <- Js.string "100%";
+  source##style##height <- Js.string "100%";
+  source##style##padding <- Js.string "8px";
+
+  result##style##width <- Js.string "100%";
+  result##style##height <- Js.string "100%";
+  result##style##padding <- Js.string "8px";
+
+  Dom.appendChild wrapper source;
+  Dom.appendChild out_wrapper result;
+  button##onclick <- Html.handler (
+                         (fun _ -> (
+                            let v = Js.to_string (source##value) in
+                            let r = eval_string v in
+                            result##value <- (Js.string r);
+                            Js._true)));
+  Js._false
+
+let _ =
+  Html.window##onload <- Html.handler start
