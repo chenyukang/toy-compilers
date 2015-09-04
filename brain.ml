@@ -59,7 +59,6 @@ let eval_string str input =
         (Printf.printf "\nPROCESS TIME OUT. KILLED!!!\n")
       else (
         incr counter;
-        (* Printf.printf "cmd: %d\n" !counter; *)
         match insts.(i) with
         | '>' -> loop (i + 1) (d + 1)
         | '<' -> loop (i + 1) (d - 1)
