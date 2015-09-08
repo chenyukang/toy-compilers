@@ -34,24 +34,29 @@ let eval_string str input =
   let result = ref "" in
   let incr_data d =
     mem.(d) <- if mem.(d) >= 255 then 0 else mem.(d) + 1 in
+
   let decr_data d =
     mem.(d) <- if mem.(d) <= 0 then 255 else mem.(d) - 1 in
+
   let read_data d =
     let r = String.get values (!pos) in
     incr pos;
     mem.(d) <- (Char.code r) in
+
   let rec skip_fore d c =
     match insts.(d) with
     | ']' -> (if c = 1 then d + 1
               else skip_fore (d+1) (c-1))
     | '[' -> skip_fore (d+1) (c+1)
     | _ -> skip_fore (d+1) c in
+
   let rec skip_back d c =
     match insts.(d) with
     | '[' -> (if c = 1 then d + 1
               else skip_back (d-1) (c-1))
     | ']' -> skip_back (d-1)(c+1)
     | _ -> skip_back (d-1) c in
+
   let rec loop i d =
     if i < 0 || i >= len then ()
     else (

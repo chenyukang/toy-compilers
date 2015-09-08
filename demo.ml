@@ -1,6 +1,3 @@
-
-
-
 type token = Number of int
            | Variable of string
            | Bool of bool
@@ -380,42 +377,7 @@ let eval_string str =
   let res = eval_prog stmts in
   res;;
 
-(* let () = *)
-(*   let stmts = (lexer_of_channel stdin) |> parse_stmts in *)
-(*   let res = eval_prog stmts in *)
-(*   Printf.printf "result: %s\n" res;; *)
-
-module Html = Dom_html
-
-let elem_from_id id =
-  let elem =
-    Js.Opt.get (Html.document##getElementById(Js.string id))
-               (fun () -> assert false) in
-  elem;;
-
-let start _ =
-  let wrapper = elem_from_id "textareawrapper" in
-  let button = elem_from_id "compile_button" in
-  let out_wrapper = elem_from_id "output" in
-  let source  = Html.createTextarea Html.document in
-  let result = Html.createTextarea Html.document in
-  source##style##width <- Js.string "100%";
-  source##style##height <- Js.string "100%";
-  source##style##padding <- Js.string "8px";
-
-  result##style##width <- Js.string "100%";
-  result##style##height <- Js.string "100%";
-  result##style##padding <- Js.string "8px";
-
-  Dom.appendChild wrapper source;
-  Dom.appendChild out_wrapper result;
-  button##onclick <- Html.handler (
-                         (fun _ -> (
-                            let v = Js.to_string (source##value) in
-                            let r = eval_string v in
-                            result##value <- (Js.string r);
-                            Js._true)));
-  Js._false
-
-let _ =
-  Html.window##onload <- Html.handler start
+let () =
+  let stmts = (lexer_of_channel stdin) |> parse_stmts in
+  let res = eval_prog stmts in
+  Printf.printf "%s" res;;
