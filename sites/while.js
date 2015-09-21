@@ -1825,7 +1825,7 @@ i=F(a[1],b);return i<F(a[2],b)?1:0;case
 j=F(a[1],b);return F(a[2],b)<j?1:0;default:throw aM}}function
 bo(a){var
 b=aJ.getElementById(a.toString());if(b==b8)throw[0,r,g3];return b}aI.onload=cb(function(a){var
-d=bo(g4),e=bo(g5),g=bo(g6),b=ce(0,0,aJ),c=ce(0,0,aJ);b.style.width=aT;b.style.height=aT;b.style.padding=cs;c.style.width=aT;c.style.height=aT;c.style.padding=cs;ca(d,b);ca(g,c);e.onclick=cb(function(a){var
+d=bo(g4),e=bo(g5),g=bo(g6),b=ce(0,0,aJ),c=ce(0,0,aJ);b.style.width=aT;b.style.height=aT;b.style.padding=cs;b.value="\nfact := 1 ;\nval := 10000 ;\ncur := val ;\nmod := 1000000007 ;\n\nwhile ( cur > 1 )\n  do\n   {\n      fact := fact * cur ;\n      fact := fact - fact / mod * mod ;\n      cur := cur - 1;\n      put cur\n   } ;\n\ncur := 0;\n\nput  val";c.style.width=aT;c.style.height=aT;c.style.padding=cs;ca(d,b);ca(g,c);e.onclick=cb(function(a){var
 j=ay(b.value),e=[0,0],d=bQ(function(a){var
 b=e[1];return b<f(j)?(e[1]++,[0,w(j,b)]):0}),l=aN(bQ(function(a){for(;;){if(0===x(d))return 0;var
 C=x(d);if(C){var
