@@ -1619,8 +1619,8 @@ bU(a,b,c){return fW(a,b,c,fX)}G([d,fY,0]);fV(az.HTMLElement)===fQ;G([d,fZ,0]);va
 bV=G([d,f0,0]);function
 a0(a){var
 b=aA.getElementById(a.toString());if(b==bM)throw[0,q,f5];return b}az.onload=bR(function(a){var
-b=a0(f6),c=a0(f7),d=a0(f8),m=bU(0,0,aA),n=bU(0,0,aA);m.style.width=aF;m.style.height=aF;m.style.padding=b3;n.style.width=aF;n.style.height=aF;n.style.padding=b3;bQ(b,m);bQ(d,n);c.onclick=bR(function(a){var
-G=ap(m.value),A=[0,0],w=bu(function(a){var
+b=a0(f6),c=a0(f7),d=a0(f8),j=bU(0,0,aA),n=bU(0,0,aA);j.style.width=aF;j.style.height=aF;j.style.padding=b3;j.value="++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";n.style.width=aF;n.style.height=aF;n.style.padding=b3;bQ(b,j);bQ(d,n);c.onclick=bR(function(a){var
+G=ap(j.value),A=[0,0],w=bu(function(a){var
 b=A[1];return b<f(G)?(A[1]++,[0,u(G,b)]):0}),x=bu(function(a){for(;;){if(0===ah(w))return 0;var
 d=ah(w);if(d){var
 b=d[1];bt(w);if(62<=b)var
@@ -1636,32 +1636,32 @@ t=t+1|0,s=s[2];continue}var
 z=aL(t,J),v=1,o=I;for(;;){if(o){var
 K=o[2];z[v+1]=o[1];var
 v=v+1|0,o=K;continue}var
-j=z;break}break}}else
+k=z;break}break}}else
 var
-j=[0];var
-d=aL(ch,0),q=[0,0],C=[0,0],y=[0,f1],c=0,b=0,L=j.length-1;a:for(;;){if(0<=c)if(L<=c)var
+k=[0];var
+d=aL(ch,0),q=[0,0],C=[0,0],y=[0,f1],c=0,b=0,L=k.length-1;a:for(;;){if(0<=c)if(L<=c)var
 H=0;else{if(!(1e5<=q[1])){q[1]++;var
-r=i(j,c)[c+1];if(63<=r){var
+r=i(k,c)[c+1];if(63<=r){var
 F=r+a4|0;if(!(2<F>>>0))switch(F){case
 0:if(0===i(d,b)[b+1]){q[1]++;var
-e=c,k=0;for(;;){var
-D=i(j,e)[e+1]+a4|0;if(!(2<D>>>0))switch(D){case
+e=c,l=0;for(;;){var
+D=i(k,e)[e+1]+a4|0;if(!(2<D>>>0))switch(D){case
 0:var
-e=e+1|0,k=k+1|0;continue;case
-1:break;default:if(1===k){var
+e=e+1|0,l=l+1|0;continue;case
+1:break;default:if(1===l){var
 c=e+1|0;continue a}var
-e=e+1|0,k=k-1|0;continue}var
+e=e+1|0,l=l-1|0;continue}var
 e=e+1|0;continue}}var
 c=c+1|0;continue;case
 1:break;default:if(0===i(d,b)[b+1]){var
 c=c+1|0;continue}q[1]++;var
-g=c,l=0;for(;;){var
-E=i(j,g)[g+1]+a4|0;if(!(2<E>>>0))switch(E){case
-0:if(1===l){var
+g=c,m=0;for(;;){var
+E=i(k,g)[g+1]+a4|0;if(!(2<E>>>0))switch(E){case
+0:if(1===m){var
 c=g+1|0;continue a}var
-g=g-1|0,l=l-1|0;continue;case
+g=g-1|0,m=m-1|0;continue;case
 1:break;default:var
-g=g-1|0,l=l+1|0;continue}var
+g=g-1|0,m=m+1|0;continue}var
 g=g-1|0;continue}}}else
 if(43<=r)switch(r+ct|0){case
 0:var

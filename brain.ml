@@ -88,6 +88,9 @@ let elem_from_id id =
                (fun () -> assert false) in
   elem;;
 
+let sample =
+  "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";;
+
 let start _ =
   let wrapper = elem_from_id "textareawrapper" in
   let button = elem_from_id "compile_button" in
@@ -97,6 +100,8 @@ let start _ =
   source##style##width <- Js.string "100%";
   source##style##height <- Js.string "100%";
   source##style##padding <- Js.string "8px";
+
+  source##value <- (Js.string sample);
 
   result##style##width <- Js.string "100%";
   result##style##height <- Js.string "100%";
