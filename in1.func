@@ -4,11 +4,32 @@ def func arg1, arg2
     put arg1 + arg2
 end;
 
-def fuck arg1, arg2, arg3
-    while (arg1 > 1) do {
-        put arg1 + arg2 + arg2
-    }
+def fuck arg1
+    while (arg1 < 10) do {
+          put arg1;
+          arg1 := arg1 + 1
+    };
+    put arg1
 end;
 
-put func;
-put fuck
+def max arg1, arg2
+    if (arg1 > arg2) then {
+        put arg1
+     } else {
+        put arg2
+    };
+    fuck arg2;
+    hello := arg2
+end;
+
+def fact arg
+   if (arg < 1) then {
+      put arg
+    } else {
+    put arg;
+    arg := arg - 1;
+    fact arg
+   }
+end;
+
+fact 5

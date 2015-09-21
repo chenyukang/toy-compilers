@@ -45,14 +45,14 @@ type exp =
    | IfStmt of exp * stmt * stmt
    | PrintStmt of exp
    | WhileStmt of exp * stmt
-   | FuncCall of (exp list) * stmt;;
+   | FuncCall of exp * (exp list);;
 
 
 type program = stmt list;;
 
 exception Invalid_char of char
 exception Syntax_error
-exception Runtime_error
+exception Runtime_error of string
 
 let rec lexer_of_channel channel =
   let src = Stream.of_channel channel in
@@ -140,7 +140,7 @@ let tokens stream =
 let rec parse stream = parse_stmts stream
 
 and skip stream tokens =
-  List.iter (fun t ->
+  List.iter (fun _ ->
              match Stream.peek stream with
              | Some t when t = t -> Stream.junk stream
              | _ -> raise Syntax_error)
@@ -223,7 +223,7 @@ and parse_assign_or_call stream =
   let lhs = parse_var stream in
   match Stream.peek stream with
   | Some OpAssign -> parse_assign lhs stream
-  | Some (Variable _) -> parse_call lhs stream
+  | Some (Variable _) | Some (Number _) -> parse_call lhs stream
   | _ -> raise Syntax_error
 
 and parse_assign lhs stream =
@@ -236,7 +236,6 @@ and parse_call lhs stream =
   let rec loop now =
     match Stream.peek stream with
     | Some Comma -> skip stream [Comma]; (loop 0)
-    | Some RParen -> skip stream [RParen]
     | _ -> (
       if now = 0 then (
         let arg = parse_exp stream in
@@ -245,8 +244,7 @@ and parse_call lhs stream =
       )
     ) in
   loop 0;
-  let body = parse_stmts stream in
-  FuncCall(!args, body)
+  FuncCall(lhs, !args)
 
 and parse_var stream =
   match Stream.peek stream with
@@ -279,7 +277,7 @@ and parse_and_exp stream =
 
 and parse_cmp_stream stream =
   let lhs = parse_plus_sub_exp stream in
-  let rec loop lhs =
+  let loop lhs =
     match Stream.peek stream with
     | Some OpLess ->
        Stream.junk stream;
@@ -349,7 +347,7 @@ let print_value value res =
   | _ -> Printf.printf "type error";;
 
 (* evaler *)
-let rec eval prog env res=
+let rec eval prog env res =
   match prog with
   | Stmts [] -> ()
   | Stmts (stmt::left) ->
@@ -372,28 +370,46 @@ let rec eval prog env res=
        if as_bool (eval_bexp cond env) then
          (eval body env res; loop()) in
      loop()
-  | FuncDef (name, args, body) -> (
-    eval_func name args body env
+  | FuncDef (name, args, body) ->
+     eval_func name args body env
+  | FuncCall (func, args) ->
+     let env' = Hashtbl.copy env in
+     eval_call func args env' res
+
+and eval_call func args env res =
+  match eval_exp func env with
+  | FuncExp(vars, body) -> (
+    let env' = extend env vars args in
+    eval body env' res
   )
-  | FuncCall (args, body) ->
-     ()
-     (* let 'env = extend_env env vars args in *)
-     (* eval body 'env *)
+  | _ -> raise (Runtime_error "eval_call")
+
+and extend env vars args =
+  let rec loop env vars args =
+    match vars, args with
+    | [], [] -> env
+    | x::x', v::v' -> (
+      Hashtbl.replace env x (eval_exp v env);
+      loop env x' v'
+    )
+    | _, _ -> raise (Runtime_error "extend")
+  in
+  loop env vars args
 
 and variable_name exp =
   match exp with
   | VarExp x -> x
-  | _ -> raise Runtime_error
+  | _ -> raise (Runtime_error "variable_name")
 
 and as_int exp =
   match exp with
   | ValExp v -> v
-  | _ -> raise Runtime_error
+  | _ -> raise (Runtime_error "as_int")
 
 and as_bool exp =
   match exp with
   | BoolExp v -> v
-  | _ -> raise Runtime_error
+  | _ -> raise (Runtime_error "as_bool")
 
 and eval_exp exp env =
   match exp with
@@ -412,11 +428,11 @@ and eval_exp exp env =
   | DivExp (lhs, rhs) ->
      let l' = as_int (eval_exp lhs env) in
      let r' = as_int (eval_exp rhs env) in
-     if r' = 0 then raise Runtime_error
+     if r' = 0 then raise (Runtime_error "eval_exp")
      else ValExp(l' / r')
   | VarExp x -> Hashtbl.find env x
-  | ValExp x -> exp
-  | _ -> raise Runtime_error
+  | ValExp _ -> exp
+  | _ -> raise (Runtime_error "eval_exp other")
 
 and eval_func name args body env =
   let name' = variable_name name in
@@ -425,12 +441,12 @@ and eval_func name args body env =
 and eval_bexp exp env =
   match exp with
   | LeExp (lhs, rhs) ->
-     let l' = as_bool (eval_exp lhs env) in
-     let r' = as_bool (eval_exp rhs env) in
+     let l' = as_int (eval_exp lhs env) in
+     let r' = as_int (eval_exp rhs env) in
      BoolExp (l' < r')
   | LaExp (lhs, rhs) ->
-     let l' = as_bool (eval_exp lhs env) in
-     let r' = as_bool (eval_exp rhs env) in
+     let l' = as_int (eval_exp lhs env) in
+     let r' = as_int (eval_exp rhs env) in
      BoolExp (l' > r')
   | AndExp (lhs, rhs) ->
      let l' = as_bool (eval_bexp lhs env) in
@@ -440,8 +456,8 @@ and eval_bexp exp env =
      let l' = as_bool (eval_bexp lhs env) in
      let r' = as_bool (eval_bexp rhs env) in
      BoolExp (l' || r')
-  | BoolExp v -> exp
-  | _ -> raise Runtime_error;;
+  | BoolExp _ -> exp
+  | _ -> raise (Runtime_error "eval_bexp")
 
 let print_of_string str =
   (lexer_of_string str) |> tokens;;
@@ -460,7 +476,10 @@ let eval_string str =
   let res = eval_prog stmts in
   res;;
 
-let () =
+let main() =
   let stmts = (lexer_of_channel stdin) |> parse_stmts in
   let res = eval_prog stmts in
   Printf.printf "%s" res;;
+
+let () =
+  main()
