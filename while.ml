@@ -377,10 +377,10 @@ let eval_string str =
   let res = eval_prog stmts in
   res;;
 
-(* let () = *)
-(*   let stmts = (lexer_of_channel stdin) |> parse_stmts in *)
-(*   let res = eval_prog stmts in *)
-(*   Printf.printf "result: %s\n" res;; *)
+let main() =
+  let stmts = (lexer_of_channel stdin) |> parse_stmts in
+  let res = eval_prog stmts in
+  Printf.printf "result: %s\n" res;;
 
 module Html = Dom_html
 
