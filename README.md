@@ -7,7 +7,13 @@ Install OCaml and Js_of_Ocaml,
 open ./sites/brain.html
 ```
 
-1. BrainFuck
-2. While language
-3. while language with function support
+1. BrainFuck: https://www.hackerrank.com/challenges/brainf-k-interpreter-fp
+2. While language: https://www.hackerrank.com/challenges/while-language-fp
+3. While language with function support
 4. to be continued ...
+
+
+
+Have a try:
+
+http://chenyukang.github.io/toy-compilers/
