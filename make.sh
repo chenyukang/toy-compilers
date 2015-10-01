@@ -8,5 +8,5 @@ ocamlfind ocamlc -package js_of_ocaml -thread -syntax camlp4o -package js_of_oca
 js_of_ocaml while.byte -o sites/while.js
 
 
-ocamlfind ocamlc -package js_of_ocaml -thread -syntax camlp4o -package js_of_ocaml.syntax -linkpkg -o while_func.byte while_func.ml
+ocamlfind ocamlc -package js_of_ocaml -thread -syntax camlp4o -package js_of_ocaml.syntax -linkpkg -o while_func.byte while_func.ml interp.mli
 js_of_ocaml while_func.byte -o sites/while_func.js
