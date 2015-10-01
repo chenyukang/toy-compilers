@@ -510,7 +510,7 @@ put demo;
 demo 1";;
 
 let start _ =
-  let wrapper = elem_from_id "textareawrapper" in
+  let wrapper = elem_from_id "textarea_wrapper" in
   let button = elem_from_id "compile_button" in
   let out_wrapper = elem_from_id "output" in
   let source  = Html.createTextarea Html.document in
