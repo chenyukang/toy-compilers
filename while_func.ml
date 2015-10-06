@@ -1,3 +1,10 @@
+open Interp
+
+module WhileFuncInterp : INTERP = struct
+exception Invalid_char of char
+exception Syntax_error
+exception Runtime_error of string
+
 type token = Number of int
            | Variable of string
            | Bool of bool
@@ -50,9 +57,6 @@ type exp =
 
 type program = stmt list;;
 
-exception Invalid_char of char
-exception Syntax_error
-exception Runtime_error of string
 
 let rec lexer_of_channel channel =
   let src = Stream.of_channel channel in
@@ -471,68 +475,10 @@ let eval_prog prog =
   eval prog env res;
   !res;;
 
-let eval_string str =
+let eval str =
   let stmts = (lexer_of_string str) |> parse_stmts in
   let res = eval_prog stmts in
   res;;
-
-let main() =
-  let stmts = (lexer_of_channel stdin) |> parse_stmts in
-  let res = eval_prog stmts in
-  Printf.printf "%s" res;;
-
-module Html = Dom_html
-
-let elem_from_id id =
-  let elem =
-    Js.Opt.get (Html.document##getElementById(Js.string id))
-               (fun () -> assert false) in
-  elem;;
+end;;
 
 
-let sample = "
-def func arg1, arg2
-    put arg1;
-    put arg2;
-    put arg1 + arg2
-end;
-
-def demo arg1
-    while (arg1 < 10) do {
-          put arg1;
-          arg1 := arg1 + 1
-    };
-    put arg1
-end;
-
-put func;
-put demo;
-demo 1";;
-
-let start _ =
-  let wrapper = elem_from_id "textarea_wrapper" in
-  let button = elem_from_id "compile_button" in
-  let out_wrapper = elem_from_id "output" in
-  let source  = Html.createTextarea Html.document in
-  let result = Html.createTextarea Html.document in
-  source##style##width <- Js.string "100%";
-  source##style##height <- Js.string "100%";
-  source##style##padding <- Js.string "8px";
-  source##value <- (Js.string sample);
-
-  result##style##width <- Js.string "100%";
-  result##style##height <- Js.string "100%";
-  result##style##padding <- Js.string "8px";
-
-  Dom.appendChild wrapper source;
-  Dom.appendChild out_wrapper result;
-  button##onclick <- Html.handler (
-                         (fun _ -> (
-                            let v = Js.to_string (source##value) in
-                            let r = eval_string v in
-                            result##value <- (Js.string r);
-                            Js._true)));
-  Js._false
-
-let _ =
-  Html.window##onload <- Html.handler start
