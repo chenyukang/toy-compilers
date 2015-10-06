@@ -1,12 +1,31 @@
 #!/bin/bash
 
-ocamlfind ocamlc -package js_of_ocaml -thread -syntax camlp4o -package js_of_ocaml.syntax -linkpkg -o brain.byte brain.ml
+rm -rf *.cmi
+rm -rf *.cmo
+rm -rf *.native
+rm -rf *.byte
+rm -rf sites/*.js
+
+COMP="ocamlfind ocamlc -package js_of_ocaml -thread -syntax camlp4o -package js_of_ocaml.syntax"
+
+`$COMP -c interp.mli`
+`$COMP -c load.ml`
+
+`$COMP -c brain.ml`
+`$COMP -c brain_top.ml`
+`$COMP -linkpkg brain.cmo load.cmo brain_top.cmo -o brain.byte`
 js_of_ocaml brain.byte -o sites/brain.js
 
 
-ocamlfind ocamlc -package js_of_ocaml -thread -syntax camlp4o -package js_of_ocaml.syntax -linkpkg -o while.byte while.ml
+`$COMP -c while.ml`
+`$COMP -c while_top.ml`
+`$COMP -linkpkg while.cmo load.cmo while_top.cmo -o while.byte`
 js_of_ocaml while.byte -o sites/while.js
 
 
-ocamlfind ocamlc -package js_of_ocaml -thread -syntax camlp4o -package js_of_ocaml.syntax -linkpkg -o while_func.byte while_func.ml
+`$COMP -c while_func.ml`
+`$COMP -c while_func_top.ml`
+`$COMP -linkpkg while_func.cmo load.cmo while_func_top.cmo -o while_func.byte`
 js_of_ocaml while_func.byte -o sites/while_func.js
+
+

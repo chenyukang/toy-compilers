@@ -68,7 +68,7 @@ body {
 .seeResult:active {
     background-color:#f1f1f1;
 }
-.textareawrapper {
+.textarea_wrapper {
     width:100%;
     height:92%;
     background-color: #ffffff;
