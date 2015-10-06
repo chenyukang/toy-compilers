@@ -3,7 +3,7 @@ open Load
 open While
 
 let _ =
-  sample := "
+  Load.sample := "
     fact := 1 ;
     val := 10000 ;
     cur := val ;

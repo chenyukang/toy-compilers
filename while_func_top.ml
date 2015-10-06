@@ -3,7 +3,7 @@ open Load
 open While_func
 
 let _ =
-  sample := "
+  Load.sample := "
 def func arg1, arg2
     put arg1;
     put arg2;
