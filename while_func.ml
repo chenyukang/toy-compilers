@@ -5,6 +5,8 @@ module WhileFuncInterp : INTERP = struct
   exception Syntax_error
   exception Runtime_error of string
 
+  let funcs = Hashtbl.create 1000;;
+
   type token = Number of int
              | Variable of string
              | Bool of bool
@@ -15,6 +17,7 @@ module WhileFuncInterp : INTERP = struct
              | KwdDo
              | KwdDef
              | KwdEnd
+             | KwdReturn
              | Comma
              | LParen
              | RParen
@@ -49,14 +52,14 @@ module WhileFuncInterp : INTERP = struct
     | FuncDef of exp * (string list) * stmt
     | Stmts of stmt list
     | Assign of exp * exp
+    | AssignCall of exp * stmt
     | IfStmt of exp * stmt * stmt
     | PrintStmt of exp
     | WhileStmt of exp * stmt
+    | ReturnStmt of exp
     | FuncCall of exp * (exp list);;
 
-
   type program = stmt list;;
-
 
   let rec lexer_of_channel channel =
     let src = Stream.of_channel channel in
@@ -121,6 +124,7 @@ module WhileFuncInterp : INTERP = struct
         | "false" -> Bool false
         | "def" -> KwdDef
         | "end" -> KwdEnd
+        | "return" -> KwdReturn
         | _ -> Variable ident)
 
   and lex_num stream buffer =
@@ -147,7 +151,7 @@ module WhileFuncInterp : INTERP = struct
     List.iter (fun _ ->
         match Stream.peek stream with
         | Some t when t = t -> Stream.junk stream
-        | _ -> raise Syntax_error)
+        | _ -> Printf.printf "skip error"; raise Syntax_error)
       tokens
 
   and parse_stmts stream =
@@ -169,10 +173,11 @@ module WhileFuncInterp : INTERP = struct
     | Some KwdIf -> parse_if stream
     | Some KwdWhile -> parse_while stream
     | Some OpPut -> parse_put stream
+    | Some KwdReturn -> parse_return stream
     | Some (Variable _) -> parse_assign_or_call stream
     | Some KwdEnd -> parse_assign_or_call stream
     | Some KwdDef -> parse_func stream
-    | _ -> raise Syntax_error
+    | _ -> Printf.printf "here\n"; raise Syntax_error
 
   and parse_if stream =
     skip stream [KwdIf];
@@ -200,6 +205,10 @@ module WhileFuncInterp : INTERP = struct
     let args = parse_args stream in
     let body = parse_stmts stream in
     skip stream [KwdEnd];
+    (match name with
+    | VarExp(name) ->
+      ignore(Hashtbl.replace funcs name true);
+    | _ -> ());
     FuncDef(name, args, body)
 
   and parse_args stream =
@@ -231,8 +240,24 @@ module WhileFuncInterp : INTERP = struct
 
   and parse_assign lhs stream =
     skip stream [OpAssign];
-    let rhs = parse_exp stream in
-    Assign(lhs, rhs)
+    match Stream.peek stream with
+    | Some (Variable x) ->
+      if Hashtbl.mem funcs x then (
+        let rhs = parse_stmt stream in
+        AssignCall(lhs, rhs)
+      ) else (
+        let rhs = parse_exp stream in
+        Assign(lhs, rhs)
+      )
+    | _ -> (
+        let rhs = parse_exp stream in
+        Assign(lhs, rhs)
+      )
+
+  and parse_return stream =
+    skip stream [KwdReturn];
+    let value = parse_exp stream in
+    ReturnStmt value
 
   and parse_call lhs stream =
     let args = ref [] in
@@ -252,7 +277,7 @@ module WhileFuncInterp : INTERP = struct
   and parse_var stream =
     match Stream.peek stream with
     | Some(Variable id) -> Stream.junk stream; VarExp id
-    | _ -> raise Syntax_error
+    | _ -> Printf.printf "parse_var"; raise Syntax_error
 
   and parse_exp stream = parse_or_exp stream
 
@@ -339,27 +364,42 @@ module WhileFuncInterp : INTERP = struct
     | Some (Bool x) ->
       Stream.junk stream;
       BoolExp x
-    | _ -> raise Syntax_error;;
+    | _ -> Printf.printf "parse_primary_exp\n"; raise Syntax_error;;
 
   let print_value value res =
     match value with
     | ValExp v ->
       res := !res ^ (Printf.sprintf "value: %d\n" v)
+    | BoolExp v ->
+      if v then
+        res := !res ^ "bool: true\n"
+      else
+        res := !res ^ "bool: false\n"
+    | VarExp v ->
+      res := !res ^ "variable: \n"
     | FuncExp(args, _) ->
       res := !res ^ (Printf.sprintf "func: with %d args\n" (List.length args))
-    | _ -> Printf.printf "type error";;
+    | _ -> res := !res ^ "type error";;
 
   (* evaler *)
   let rec eval prog env res =
     match prog with
-    | Stmts [] -> ()
+    | Stmts [] -> (BoolExp true)
+    | Stmts (stmt::[]) ->
+      eval stmt env res
     | Stmts (stmt::left) ->
-      eval stmt env res;
+      ignore(eval stmt env res);
       eval (Stmts left) env res
     | Assign (lhs, rhs) ->
       let key = variable_name lhs in
       let value = eval_exp rhs env in
-      Hashtbl.replace env key value
+      Hashtbl.replace env key value;
+      value
+    | AssignCall (lhs, stmt) ->
+      let key = variable_name lhs in
+      let value = eval stmt env res in
+      Hashtbl.replace env key value;
+      value
     | IfStmt (cond, tbody, fbody) ->
       if as_bool (eval_bexp cond env) then
         eval tbody env res
@@ -367,14 +407,18 @@ module WhileFuncInterp : INTERP = struct
         eval fbody env res
     | PrintStmt exp ->
       let r = eval_exp exp env in
-      print_value r res
+      print_value r res;
+      r
     | WhileStmt (cond, body) ->
       let rec loop() =
         if as_bool (eval_bexp cond env) then
-          (eval body env res; loop()) in
-      loop()
+          (ignore(eval body env res); loop()) in
+      loop();
+      (BoolExp true)
     | FuncDef (name, args, body) ->
       eval_func name args body env
+    | ReturnStmt (body) ->
+      eval_exp body env
     | FuncCall (func, args) ->
       let env' = Hashtbl.copy env in
       eval_call func args env' res
@@ -439,7 +483,9 @@ module WhileFuncInterp : INTERP = struct
 
   and eval_func name args body env =
     let name' = variable_name name in
-    Hashtbl.replace env name' (FuncExp(args, body))
+    let func = FuncExp(args, body) in
+    Hashtbl.replace env name' func;
+    func
 
   and eval_bexp exp env =
     match exp with
@@ -471,7 +517,7 @@ module WhileFuncInterp : INTERP = struct
   let eval_prog prog =
     let env = Hashtbl.create 1000 in
     let res = ref "" in
-    eval prog env res;
+    ignore(eval prog env res);
     !res;;
 
   let eval str =

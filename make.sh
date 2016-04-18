@@ -29,3 +29,5 @@ js_of_ocaml while.byte -o sites/while.js
 js_of_ocaml while_func.byte -o sites/while_func.js
 
 
+`$COMP -c while_func_demo.ml`
+`$COMP -linkpkg while_func.cmo while_func_demo.cmo -o while_func_demo.byte`
