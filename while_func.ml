@@ -227,8 +227,7 @@ module WhileFuncInterp : INTERP = struct
     let lhs = parse_var stream in
     match Stream.peek stream with
     | Some OpAssign -> parse_assign lhs stream
-    | Some (Variable _) | Some (Number _) -> parse_call lhs stream
-    | _ -> raise Syntax_error
+    | _ -> parse_call lhs stream
 
   and parse_assign lhs stream =
     skip stream [OpAssign];
