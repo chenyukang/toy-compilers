@@ -84,8 +84,14 @@ module BrainFuck : INTERP = struct
     loop 0 0;
     !result;;
 
-  let eval str =
-    eval_string str "";;
+    let eval str =
+      try
+        eval_string str ""
+      with
+    | Runtime_error e -> Printf.sprintf "Runtime_error: %s" e
+    | Syntax_error -> "Syntax_error"
+    | Invalid_char c -> Printf.sprintf "Invalid_char: %c" c
+    | _ -> "Error"
 
 end;;
 

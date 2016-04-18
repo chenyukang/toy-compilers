@@ -2,4 +2,5 @@
 *.cmo
 *.byte
 *.native
+sites/.tern-port
 _build
