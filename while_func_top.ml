@@ -21,6 +21,6 @@ end;
 put func;
 put demo;
 demo 1";
-  let module Loader = Loader(WhileFuncInterp) in 
+  let module Loader = Loader(WhileFuncInterp) in
   Html.window##onload <- Html.handler (Loader.start)
 

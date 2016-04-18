@@ -475,9 +475,13 @@ module WhileFuncInterp : INTERP = struct
     !res;;
 
   let eval str =
-    let stmts = (lexer_of_string str) |> parse_stmts in
-    let res = eval_prog stmts in
-    res;;
+    try
+      (lexer_of_string str) |> parse_stmts |> eval_prog
+    with
+    | Runtime_error e -> Printf.sprintf "Runtime_error: %s" e
+    | Syntax_error -> "Syntax_error"
+    | Invalid_char c -> Printf.sprintf "Invalid_char: %c" c
+    | _ -> "Error"
 end;;
 
 

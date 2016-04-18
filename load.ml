@@ -2,9 +2,7 @@ open Interp
 
 module Html = Dom_html
 
-let sample =
-  ref "";;
-
+let sample = ref "";;
 
 let elem_from_id id =
   let elem =
