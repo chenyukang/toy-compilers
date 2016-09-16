@@ -16,4 +16,4 @@ open ./sites/brain.html
 
 Have a try:
 
-http://chenyukang.github.io/toy-compilers/
+http://chenyukang.com/toy-compilers/
